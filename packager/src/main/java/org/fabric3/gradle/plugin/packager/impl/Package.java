@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -39,13 +40,11 @@ import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.fabric3.gradle.plugin.core.resolver.AetherBootstrap;
 import org.fabric3.gradle.plugin.core.util.FileHelper;
-import org.fabric3.gradle.plugin.core.util.ProgressLoggerCompat;
+import org.fabric3.gradle.plugin.core.util.ProgressLoggerWrapper;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.bundling.War;
 import org.gradle.internal.service.ServiceRegistry;
-import org.gradle.logging.ProgressLogger;
-import org.gradle.logging.ProgressLoggerFactory;
 import static org.fabric3.gradle.plugin.core.Constants.FABRIC3_GROUP;
 import static org.fabric3.gradle.plugin.core.Constants.FABRIC3_VERSION;
 
@@ -56,7 +55,7 @@ import static org.fabric3.gradle.plugin.core.Constants.FABRIC3_VERSION;
 public class Package extends War {
     public static final String F3_EXTENSIONS_JAR = "f3.extensions.jar";
 
-    private ProgressLogger progressLogger;
+    private ProgressLoggerWrapper progressLogger;
 
     private File stagingDirectory;
 
@@ -68,8 +67,8 @@ public class Package extends War {
     private File extensionsDirectory;
 
     @Inject
-    public Package(ProgressLoggerFactory progressLoggerFactory) {
-        this.progressLogger = progressLoggerFactory.newOperation("fabric3Packager");
+    public Package(Project project) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        this.progressLogger = new ProgressLoggerWrapper(project, "fabric3Packager");
     }
 
     protected void copy() {
@@ -93,7 +92,7 @@ public class Package extends War {
 
             getWebInf().into("lib").from(extensionsJar, nodeJar, nodeExtensionsJar);
 
-            progressLogger.completed("COMPLETED");
+            progressLogger.completed();
         } catch (IOException e) {
             throw new GradleException(e.getMessage(), e);
         }
@@ -101,9 +100,9 @@ public class Package extends War {
     }
 
     private void init() {
-        ProgressLoggerCompat.setDescription(progressLogger, "Fabric3 packager plugin");
-        ProgressLoggerCompat.setLoggingHeader(progressLogger, "Fabric3 packager plugin");
-        progressLogger.started("STARTING");
+        progressLogger.setDescription("Fabric3 packager plugin");
+        progressLogger.setLoggingHeader("Fabric3 packager plugin");
+        progressLogger.started();
 
         Project project = getProject();
         boolean offline = project.getGradle().getStartParameter().isOffline();

@@ -19,9 +19,11 @@ package org.fabric3.gradle.plugin.assembly.impl;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.fabric3.gradle.plugin.core.util.ProgressLoggerWrapper;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.artifact.Artifact;
@@ -36,13 +38,10 @@ import org.fabric3.gradle.plugin.core.stopwatch.StopWatch;
 import org.fabric3.gradle.plugin.core.stopwatch.StreamStopWatch;
 import org.fabric3.gradle.plugin.core.util.ConfigFile;
 import org.fabric3.gradle.plugin.core.util.FileHelper;
-import org.fabric3.gradle.plugin.core.util.ProgressLoggerCompat;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.bundling.Zip;
 import org.gradle.internal.service.ServiceRegistry;
-import org.gradle.logging.ProgressLogger;
-import org.gradle.logging.ProgressLoggerFactory;
 import static org.fabric3.gradle.plugin.core.Constants.FABRIC3_GROUP;
 
 /**
@@ -52,7 +51,7 @@ import static org.fabric3.gradle.plugin.core.Constants.FABRIC3_GROUP;
 public class Assemble extends Zip {
 
     private StopWatch stopWatch;
-    private ProgressLogger progressLogger;
+    private ProgressLoggerWrapper progressLogger;
     private File imageDir;
     private RepositorySystem system;
     private DefaultRepositorySystemSession session;
@@ -60,8 +59,8 @@ public class Assemble extends Zip {
     private AssemblyPluginConvention convention;
 
     @Inject
-    public Assemble(ProgressLoggerFactory progressLoggerFactory) {
-        this.progressLogger = progressLoggerFactory.newOperation("fabric3Assembly");
+    public Assemble() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        this.progressLogger = new ProgressLoggerWrapper(getProject(), "fabric3Assembly");
         if (Boolean.parseBoolean(System.getProperty("fabric3.performance"))) {
             stopWatch = new StreamStopWatch("gradle", TimeUnit.MILLISECONDS, System.out);
         } else {
@@ -87,7 +86,7 @@ public class Assemble extends Zip {
             }
 
             from(imageDir);
-            progressLogger.completed("COMPLETED");
+            progressLogger.completed();
         } catch (ArtifactResolutionException | IOException e) {
             throw new GradleException(e.getMessage(), e);
         }
@@ -97,9 +96,9 @@ public class Assemble extends Zip {
     }
 
     private void init() {
-        ProgressLoggerCompat.setDescription(progressLogger, "Fabric3 assembly plugin");
-        ProgressLoggerCompat.setLoggingHeader(progressLogger, "Fabric3 assembly plugin");
-        progressLogger.started("STARTING");
+        progressLogger.setDescription("Fabric3 assembly plugin");
+        progressLogger.setLoggingHeader("Fabric3 assembly plugin");
+        progressLogger.started();
 
         Project project = getProject();
         boolean offline = project.getGradle().getStartParameter().isOffline();
@@ -142,7 +141,6 @@ public class Assemble extends Zip {
                 throw new GradleException("Unable to exclude extension: " + file);
             }
         }
-
     }
 
     private void installConfiguration() throws IOException {
