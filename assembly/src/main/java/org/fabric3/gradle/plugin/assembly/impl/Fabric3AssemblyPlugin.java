@@ -51,7 +51,7 @@ public class Fabric3AssemblyPlugin implements Plugin<Project> {
         Zip zip = project.getTasks().create("fabric3Assembly", Assemble.class);
         zip.setDescription("Assembles a Fabric3 runtime image.");
         zip.setGroup(BasePlugin.BUILD_GROUP);
-        zip.getInputs().source(REBUILD_MARKER);
+        zip.getInputs().file(REBUILD_MARKER).skipWhenEmpty();
 
         JavaPluginConvention convention = project.getConvention().getPlugin(JavaPluginConvention.class);
         zip.from(convention.getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME).getOutput());
