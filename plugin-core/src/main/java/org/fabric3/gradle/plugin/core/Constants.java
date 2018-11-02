@@ -21,6 +21,6 @@ package org.fabric3.gradle.plugin.core;
  */
 public interface Constants {
     // These get updated whenever gradle is run
-    String FABRIC3_VERSION = "3.0.1-SNAPSHOT";
+    String FABRIC3_VERSION = "3.1.0-SNAPSHOT";
     String FABRIC3_GROUP = "com.carecon.fabric3";
 }
