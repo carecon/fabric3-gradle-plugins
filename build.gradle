@@ -192,7 +192,26 @@ configure(plugins()) {
     }
 }
 
+// Version & group
+task('updateVersionInformationInFiles') {
+    doLast {
+        def constantsFile = new File("$projectDir/plugin-core/src/main/java/org/fabric3/gradle/plugin/core/Constants.java")
+        def content = constantsFile
+                .getText("UTF-8")
+                .replaceFirst("(String FABRIC3_VERSION = \")([^\"]+)(\";)", "\$1$version\$3")
+                .replaceFirst("(String FABRIC3_GROUP = \")([^\"]+)(\";)", "\$1$fabric3Group\$3")
+        constantsFile.write(content, "UTF-8")
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.11'
+
+        def files =  fileTree("$projectDir").filter { it.isFile() && it.name.equals('sca-contribution.xml') }.files
+        files.forEach {
+            content = it.getText("UTF-8")
+                    .replaceAll("(<import.java package=\"org.fabric3[^\"]*\" version=\")([^\"]+)(\"/>)", "\$1$version\$3")
+            it.write(content, "UTF-8")
+        }
+    }
+}
+
+configure(deployProjects()) {
+    compileJava.dependsOn updateVersionInformationInFiles
 }
