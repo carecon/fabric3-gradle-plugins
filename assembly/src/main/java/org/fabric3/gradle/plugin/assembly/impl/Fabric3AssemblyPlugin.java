@@ -19,6 +19,7 @@ package org.fabric3.gradle.plugin.assembly.impl;
 import javax.inject.Inject;
 import java.io.File;
 
+import org.fabric3.gradle.plugin.core.util.GradleVersionCheck;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.UnknownTaskException;
@@ -45,6 +46,7 @@ public class Fabric3AssemblyPlugin implements Plugin<Project> {
 
     @Inject
     public void apply(final Project project) {
+        GradleVersionCheck.checkGradleVersion(project, "3.3", "fabric3-assembly");
         disableJar(project);
         project.getConvention().add(AssemblyPluginConvention.FABRIC3_ASSEMBLY_CONVENTION, AssemblyPluginConvention.class);
 
@@ -75,5 +77,4 @@ public class Fabric3AssemblyPlugin implements Plugin<Project> {
             // ignore
         }
     }
-
 }

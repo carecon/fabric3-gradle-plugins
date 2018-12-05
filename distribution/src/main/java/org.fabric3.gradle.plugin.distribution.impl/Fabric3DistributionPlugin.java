@@ -19,6 +19,7 @@ package org.fabric3.gradle.plugin.distribution.impl;
 import javax.inject.Inject;
 
 import groovy.lang.Closure;
+import org.fabric3.gradle.plugin.core.util.GradleVersionCheck;
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -53,6 +54,7 @@ public class Fabric3DistributionPlugin implements Plugin<Project> {
     }
 
     public void apply(final Project project) {
+        GradleVersionCheck.checkGradleVersion(project, "3.3", "fabric3-distribution");
         project.getPlugins().apply(BasePlugin.class);
 
         ExtensionContainer extensions = project.getExtensions();

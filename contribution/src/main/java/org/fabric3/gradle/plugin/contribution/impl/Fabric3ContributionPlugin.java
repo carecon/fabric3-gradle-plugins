@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.util.Set;
 
+import org.fabric3.gradle.plugin.core.util.GradleVersionCheck;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -49,7 +50,7 @@ public class Fabric3ContributionPlugin implements Plugin<Project> {
 
     @Inject
     public void apply(final Project project) {
-
+        GradleVersionCheck.checkGradleVersion(project, "3.3", "fabric3-contribution");
         disableJar(project);
 
         final Jar contribution = project.getTasks().create("fabric3Contribution", Jar.class);

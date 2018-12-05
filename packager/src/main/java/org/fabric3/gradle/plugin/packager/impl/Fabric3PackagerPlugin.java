@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import java.util.concurrent.Callable;
 
 import org.fabric3.gradle.plugin.core.Constants;
+import org.fabric3.gradle.plugin.core.util.GradleVersionCheck;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -47,6 +48,7 @@ public class Fabric3PackagerPlugin implements Plugin<Project> {
 
     @Inject
     public void apply(final Project project) {
+        GradleVersionCheck.checkGradleVersion(project, "3.3", "fabric3-packager");
         disableJar(project);
 
         final PackagerPluginConvention convention = new PackagerPluginConvention(project);
